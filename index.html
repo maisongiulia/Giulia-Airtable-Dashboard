@@ -256,7 +256,7 @@ body{font-family:'DM Mono',monospace;background:#F0EBE3;color:var(--ink);font-si
 
 <script>
 // ── CONFIG ───────────────────────────────────────────────────────────────
-const API = '/.netlify/functions/airtable'; // server-side proxy — no CORS
+const TOKEN = 'patkpthL0zs1pYW1q.da12aaa1c7efd9ca0d20acadf8c1ed0f4f51cbd888aad12849c46b8125771aac';
 const LOST = new Set(['Anantara - Nice',"La Chèvre d'Or"]);
 const SKIP = new Set(['Shopify','Sumup']);
 const RETAIL = new Set(['Retail']);
@@ -510,12 +510,18 @@ async function loadData(){
   loader.classList.remove('gone');lp(10);lt('Connecting to Airtable…');
 
   try{
-    lp(30);lt('Fetching orders…');
-    const res=await fetch(API);
-    if(!res.ok)throw new Error(`Server error ${res.status}: check AIRTABLE_TOKEN env variable in Netlify`);
-    const json=await res.json();
-    if(json.error)throw new Error('Airtable error: '+json.error);
-    const raw=json.records;
+    lp(30);lt('Fetching orders…')
+    let raw=[],offset=null;
+const fp=FIELDS.map(f=>'fields[]='+f).join('&');
+do{
+  const url=`https://api.airtable.com/v0/${BASE}/${TABLE}?pageSize=100&returnFieldsByFieldId=true&${fp}${offset?'&offset='+offset:''}`;
+  const res=await fetch(url,{headers:{Authorization:'Bearer '+TOKEN}});
+  if(!res.ok)throw new Error('Airtable error '+res.status);
+  const d=await res.json();
+  if(!d.records)throw new Error('No records: '+JSON.stringify(d).slice(0,200));
+  raw=raw.concat(d.records);
+  offset=d.offset||null;
+}while(offset);
     if(!raw||!Array.isArray(raw))throw new Error('No records returned. Response: '+JSON.stringify(json).slice(0,200));
     lp(70);lt('Computing metrics… '+raw.length+' orders found');
 
