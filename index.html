@@ -278,7 +278,7 @@ function parse(raw){
     const bv=f['fldau2yVTSGDHstbj']!==undefined?f['fldau2yVTSGDHstbj']:(f['Total BT']||0);
     const bt=typeof bv==='number'?bv:0;
     const catR=f['fldSgvOrQe6zglTZW']||f['Category'];
-    const ca=Array.isArray(catR)&&catR.length?catR[0].name.trim():'Unknown';
+    const catR=f['fldSgvOrQe6zglTZW'];const ca=(Array.isArray(catR)&&catR.length&&catR[0]&&catR[0].name)?catR[0].name.trim():'Unknown';
     const cr=f['fldl3FfeAWFrBmKvw']||f['Companies'];
     const cvs=cr&&cr.valuesByLinkedRecordId?Object.values(cr.valuesByLinkedRecordId):[];
     const coA=Array.isArray(cr)?cr:[];
